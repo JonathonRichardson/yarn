@@ -17,6 +17,7 @@ import {default as userHome, home} from '../util/user-home-dir';
 import path from 'path';
 import url from 'url';
 import ini from 'ini';
+import toNerfDart from 'nerf-dart';
 
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
 const REGEX_REGISTRY_HTTP_PROTOCOL = /^https?:/i;
@@ -99,8 +100,8 @@ export default class NpmRegistry extends Registry {
   }
 
   isRequestToRegistry(requestUrl: string, registryUrl: string): boolean {
-    const normalizedRequestUrl = normalizeUrl(requestUrl);
-    const normalizedRegistryUrl = normalizeUrl(registryUrl);
+    const normalizedRequestUrl = normalizeUrl(toNerfDart(requestUrl));
+    const normalizedRegistryUrl = normalizeUrl(toNerfDart(registryUrl));
     const requestParsed = url.parse(normalizedRequestUrl);
     const registryParsed = url.parse(normalizedRegistryUrl);
     const requestHost = requestParsed.host || '';
@@ -123,7 +124,7 @@ export default class NpmRegistry extends Registry {
     const registry = this.getRegistry(packageIdent);
     const requestUrl = this.getRequestUrl(registry, pathname);
 
-    const alwaysAuth = this.getRegistryOrGlobalOption(registry, 'always-auth');
+    const alwaysAuth = this.getRegistryOrGlobalOption(toNerfDart(registry), 'always-auth');
 
     const headers = Object.assign(
       {
@@ -277,7 +278,7 @@ export default class NpmRegistry extends Registry {
       registries.push(DEFAULT_REGISTRY);
     }
 
-    for (const registry of registries) {
+    for (const registry of registries.map(toNerfDart)) {
       // Check for bearer token.
       const authToken = this.getRegistryOrGlobalOption(registry, '_authToken');
       if (authToken) {
